@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Unique_Finder")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6350578354a1e51296bfb50783dd798915c77b83")]
 [assembly: System.Reflection.AssemblyProductAttribute("Unique_Finder")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Unique_Finder")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
