@@ -30,6 +30,7 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             groupBox1 = new System.Windows.Forms.GroupBox();
+            button6 = new System.Windows.Forms.Button();
             textBox2 = new System.Windows.Forms.TextBox();
             textBox1 = new System.Windows.Forms.TextBox();
             label2 = new System.Windows.Forms.Label();
@@ -55,6 +56,7 @@
             // 
             // groupBox1
             // 
+            groupBox1.Controls.Add(button6);
             groupBox1.Controls.Add(textBox2);
             groupBox1.Controls.Add(textBox1);
             groupBox1.Controls.Add(label2);
@@ -67,12 +69,22 @@
             groupBox1.TabStop = false;
             groupBox1.Text = "Требования для работы приложения";
             // 
+            // button6
+            // 
+            button6.Image = Properties.Resources.Reset1;
+            button6.Location = new System.Drawing.Point(569, 30);
+            button6.Name = "button6";
+            button6.Size = new System.Drawing.Size(52, 55);
+            button6.TabIndex = 1;
+            button6.UseVisualStyleBackColor = true;
+            button6.Click += Button6_Click;
+            // 
             // textBox2
             // 
             textBox2.BackColor = System.Drawing.SystemColors.ControlLightLight;
             textBox2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             textBox2.Font = new System.Drawing.Font("Yu Gothic UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            textBox2.Location = new System.Drawing.Point(290, 61);
+            textBox2.Location = new System.Drawing.Point(225, 62);
             textBox2.Name = "textBox2";
             textBox2.ReadOnly = true;
             textBox2.Size = new System.Drawing.Size(329, 23);
@@ -84,7 +96,7 @@
             textBox1.BackColor = System.Drawing.SystemColors.ControlLightLight;
             textBox1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             textBox1.Font = new System.Drawing.Font("Yu Gothic UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            textBox1.Location = new System.Drawing.Point(290, 29);
+            textBox1.Location = new System.Drawing.Point(225, 30);
             textBox1.Name = "textBox1";
             textBox1.ReadOnly = true;
             textBox1.Size = new System.Drawing.Size(329, 23);
@@ -148,7 +160,7 @@
             // 
             button2.Location = new System.Drawing.Point(381, 60);
             button2.Name = "button2";
-            button2.Size = new System.Drawing.Size(236, 35);
+            button2.Size = new System.Drawing.Size(238, 35);
             button2.TabIndex = 2;
             button2.Text = "Проверка";
             button2.UseVisualStyleBackColor = true;
@@ -190,7 +202,7 @@
             // 
             button4.Location = new System.Drawing.Point(383, 70);
             button4.Name = "button4";
-            button4.Size = new System.Drawing.Size(236, 34);
+            button4.Size = new System.Drawing.Size(238, 34);
             button4.TabIndex = 2;
             button4.Text = "Открыть файл камеры";
             button4.UseVisualStyleBackColor = true;
@@ -213,7 +225,7 @@
             textBox5.Location = new System.Drawing.Point(26, 27);
             textBox5.Name = "textBox5";
             textBox5.ReadOnly = true;
-            textBox5.Size = new System.Drawing.Size(593, 23);
+            textBox5.Size = new System.Drawing.Size(595, 23);
             textBox5.TabIndex = 0;
             // 
             // groupBox5
@@ -234,6 +246,7 @@
             button5.TabIndex = 0;
             button5.Text = "Добавить";
             button5.UseVisualStyleBackColor = true;
+            button5.Click += Button5_Click;
             // 
             // MainForm
             // 
@@ -283,5 +296,6 @@
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.TextBox textBox5;
         private System.Windows.Forms.Button button5;
+        private System.Windows.Forms.Button button6;
     }
 }

@@ -5,7 +5,7 @@ namespace Unique_Finder.Database
 {
     public class DatabaseContextUnique : DbContext
     {
-        public DbSet<DatabaseTemplate> UniqueCodes { get; set; }
+        public DbSet<DatabaseTemplate> UniqueCodes { get; set; } = null!;
 
         public DatabaseContextUnique() => Database.EnsureCreated();
 

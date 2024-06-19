@@ -4,6 +4,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Data.SqlClient;
@@ -126,7 +127,7 @@ namespace Unique_Finder
                 $"SELECT database_id FROM sys.databases WHERE Name = @databaseName",
                 connection
             );
-            databaseCommand.Parameters.AddWithValue("@databaseName", "unique_db");
+            databaseCommand.Parameters.AddWithValue("@databaseName", "'unique_db'");
             var databaseResult = databaseCommand.ExecuteScalar();
 
             var tableCommand = new SqlCommand(
@@ -137,8 +138,8 @@ namespace Unique_Finder
             var tableResult = tableCommand.ExecuteScalar();
 
             if (
-                tableResult != null && databaseResult != null
-                || tableResult == null && databaseResult == null
+                (tableResult != null && databaseResult != null)
+                || (tableResult == null && databaseResult == null)
             )
             {
                 LogMessage("Проверка базы данных пройдена");
@@ -277,7 +278,7 @@ namespace Unique_Finder
                 sourceFilePath = openFileDialog.FileName;
                 textBox4.Text = sourceFilePath;
                 textBox4.BackColor = Color.LightGreen;
-                textBox3.Text = "Файл открыт, теперь, произведите проверку файла";
+                textBox3.Text = "Файл открыт";
                 textBox3.BackColor = Color.LightGreen;
 
                 button2.Enabled = true;
@@ -386,7 +387,7 @@ namespace Unique_Finder
                 }
                 else
                 {
-                    string copiedSourceFilePath = Path.Combine(
+                    copiedSourceFilePath = Path.Combine(
                         sourceFileDirectory,
                         Path.GetFileNameWithoutExtension(sourceFilePath.Replace(" ", ""))
                             + "_success"
@@ -451,55 +452,67 @@ namespace Unique_Finder
 
         private async void Button3_Click(object sender, EventArgs e)
         {
+            ShowLoadingForm("Идёт сравнение данных...");
+
             button1.Enabled = false;
             button2.Enabled = false;
             LogMessage("Нажата кнопка сравнения.");
-            List<string> duplicates = new List<string>();
-            ShowLoadingForm("Идёт сравнение данных...");
+            List<string> duplicates = new();
 
             LogMessage("Начато сравнение данных.");
-
-            using (DatabaseContextUnique unique_db = new())
+            try
             {
-                var existingEntities = await unique_db.UniqueCodes.ToListAsync();
-
-                if (existingEntities.Count == 0)
+                using (DatabaseContextUnique unique_db = new())
                 {
-                    MessageBox.Show(
-                        "База данных пуста, можно переходить к добавлению данных.",
-                        "Проверка",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Information
-                    );
-                    LogMessage("База данных пуста.");
+                    var existingEntities = await unique_db.UniqueCodes.ToListAsync();
 
-                    button4.Enabled = true;
-                    button4.BeginInvoke(new MethodInvoker(() => button4.Select()));
-
-                    HideLoadingForm();
-                    return;
-                }
-
-                var existingMarkingCodes = existingEntities.Select(e => e.MarkingCode).ToHashSet();
-
-                duplicates = new List<string>();
-
-                using (StreamReader reader = new StreamReader(sourceFilePath))
-                {
-                    string? line;
-                    while ((line = await reader.ReadLineAsync()) != null)
+                    if (existingEntities.Count == 0)
                     {
-                        if (existingMarkingCodes.Contains(line))
+                        HideLoadingForm();
+
+                        MessageBox.Show(
+                            "База данных пуста, можно переходить к добавлению данных.",
+                            "Проверка",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Information
+                        );
+                        LogMessage("База данных пуста.");
+
+                        button4.Enabled = true;
+                        button4.BeginInvoke(new MethodInvoker(() => button4.Select()));
+
+                        return;
+                    }
+
+                    var existingMarkingCodes = existingEntities
+                        .Select(e => e.MarkingCode)
+                        .ToHashSet();
+
+                    duplicates = new List<string>();
+
+                    using (StreamReader reader = new(sourceFilePath))
+                    {
+                        string? line;
+                        while ((line = await reader.ReadLineAsync()) != null)
                         {
-                            duplicates.Add(line);
-                            if (duplicates.Count >= 20)
+                            string[] parts = line.Split('\t');
+                            if (parts.Length >= 1)
                             {
-                                break;
+                                string code = parts[0].Trim();
+                                if (existingMarkingCodes.Contains(code))
+                                {
+                                    duplicates.Add(code);
+                                    if (duplicates.Count >= 20)
+                                    {
+                                        break;
+                                    }
+                                }
                             }
                         }
                     }
-                    HideLoadingForm();
                 }
+
+                HideLoadingForm();
 
                 if (duplicates.Count == 0)
                 {
@@ -516,7 +529,13 @@ namespace Unique_Finder
                 }
                 else
                 {
-                    await CreateErrorReportAsync(duplicates, existingEntities);
+                    using (DatabaseContextUnique unique_db = new())
+                    {
+                        var existingEntities = await unique_db
+                            .UniqueCodes.Where(e => duplicates.Contains(e.MarkingCode))
+                            .ToListAsync();
+                        await CreateErrorReportAsync(duplicates, existingEntities);
+                    }
                     MessageBox.Show(
                         $"Отчёт об ошибках создан:\n{errorReportPath}",
                         "Проверка провалена",
@@ -529,6 +548,36 @@ namespace Unique_Finder
                     Restart_App();
                 }
             }
+            catch (IOException ex)
+            {
+                MessageBox.Show(
+                    $"Произошла ошибка ввода-вывода: {ex.Message}",
+                    "Ошибка",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+                HideLoadingForm();
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                MessageBox.Show(
+                    $"Отказано в доступе: {ex.Message}",
+                    "Ошибка",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+                HideLoadingForm();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Произошла ошибка: {ex.Message}",
+                    "Ошибка",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+                HideLoadingForm();
+            }
 
             GC.Collect();
             GC.WaitForPendingFinalizers();
@@ -540,7 +589,10 @@ namespace Unique_Finder
         )
         {
             var currentDate = DateTime.Now.ToString("_dd-MM-yyyy_HH-mm-ss");
-            errorReportPath = Path.Combine(logDirectory, $"error_report_{currentDate}.txt");
+            errorReportPath = Path.Combine(
+                databaseErrorDirectory,
+                $"error_report_{currentDate}.txt"
+            );
             string checkedFile =
                 Path.GetFileNameWithoutExtension(copiedSourceFilePath.Replace(" ", ""))
                 + Path.GetExtension(copiedSourceFilePath);
@@ -555,11 +607,311 @@ namespace Unique_Finder
             }
             await writer.WriteLineAsync("\n\tЛимит проверки дубликатов = 20 кодов\t");
             await writer.DisposeAsync();
+
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
         }
 
         // SECTION BUTTON 4
 
 
-        private void Button4_Click(object sender, EventArgs e) { }
+        private async void Button4_Click(object sender, EventArgs e)
+        {
+            button3.Enabled = false;
+            LogMessage("Нажата кнопка открытия файла камеры");
+
+            using OpenFileDialog openFileDialog =
+                new()
+                {
+                    InitialDirectory = "c:\\",
+                    Filter = "All files (*.*)|*.*",
+                    FilterIndex = 1,
+                    RestoreDirectory = true
+                };
+
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                ShowLoadingForm("Импорт класса точности с файла камеры...");
+                sourceCameraFilePath = openFileDialog.FileName;
+                textBox5.Text = sourceCameraFilePath;
+                textBox5.BackColor = Color.LightGreen;
+                textBox3.Text = "Файл камеры открыт";
+                textBox3.BackColor = Color.LightGreen;
+                LogMessage($"Выбран файл камеры: {sourceCameraFilePath}");
+
+                bool filesMatch = await DifferenceBetweenFilesFinderAsync(
+                    copiedSourceFilePath,
+                    sourceCameraFilePath
+                );
+
+                if (!filesMatch)
+                {
+                    HideLoadingForm();
+                    MessageBox.Show(
+                        $"Файл камеры не совпадает с исходным файлом.\nИмпорт классификации невозможен...\nПовторите попытку",
+                        "Проверка провалена",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error
+                    );
+                }
+                else
+                {
+                    copiedSourceCameraFilePath = Path.Combine(
+                        sourceCameraFileDirectory,
+                        Path.GetFileNameWithoutExtension(sourceCameraFilePath.Replace(" ", ""))
+                            + "_succses_marked"
+                            + DateTime.Now.ToString("_dd-MM-yyyy_HH-mm-ss")
+                            + Path.GetExtension(sourceCameraFilePath)
+                    );
+                    File.Copy(sourceCameraFilePath, copiedSourceCameraFilePath);
+
+                    completedFilePath = Path.Combine(
+                        completedFileDirectory,
+                        Path.GetFileNameWithoutExtension(sourceCameraFilePath.Replace(" ", ""))
+                            + "_final"
+                            + DateTime.Now.ToString("_dd-MM-yyyy_HH-mm-ss")
+                            + Path.GetExtension(sourceCameraFilePath)
+                    );
+                    File.Copy(copiedSourceFilePath, completedFilePath);
+                    await ReplaceVoidAsync(
+                        copiedSourceFilePath,
+                        sourceCameraFilePath,
+                        completedFilePath
+                    );
+                    await CleanFileAsync(completedFilePath);
+                    HideLoadingForm();
+
+                    CollectGarbage();
+
+                    DialogResult result = MessageBox.Show(
+                        $"Финальный файл с классом точности создан...",
+                        "Файл отфильтрован",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information
+                    );
+                    if (result == DialogResult.OK)
+                    {
+                        textBox5.Text = completedFilePath;
+                        button4.Enabled = false;
+                        groupBox5.Enabled = true;
+                    }
+                }
+            }
+        }
+
+        private void CollectGarbage()
+        {
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+        }
+
+        private static async Task<bool> DifferenceBetweenFilesFinderAsync(
+            string file1Path,
+            string file2Path
+        )
+        {
+            string[] codesFile1 = await ReadAllLinesAsync(file1Path);
+            string[] codesFile2 = await ReadAllLinesAsync(file2Path);
+
+            foreach (string codeFile1 in codesFile1)
+            {
+                if (codesFile2.Any(lineFile2 => lineFile2.Contains(codeFile1)))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private static async Task<string[]> ReadAllLinesAsync(string filePath)
+        {
+            var lines = new List<string>();
+
+            using (var streamReader = new StreamReader(filePath))
+            {
+                string line;
+                while ((line = await streamReader.ReadLineAsync()) != null)
+                {
+                    lines.Add(line);
+                }
+            }
+
+            return lines.ToArray();
+        }
+
+        public static async Task ReplaceVoidAsync(string file1, string file2, string file3)
+        {
+            string inputFile1 = file1;
+            string inputFile2 = file2;
+            string outputFile = file3;
+            var valueToLetter = new Dictionary<string, char>();
+
+            using (StreamReader reader = new(inputFile2))
+            {
+                string? line;
+                while ((line = await reader.ReadLineAsync()) != null)
+                {
+                    string[] parts = line.Split('\t');
+                    if (parts.Length >= 2)
+                    {
+                        string value = parts[0].Trim();
+                        char letter = parts[1].Trim().Length > 0 ? parts[1].Trim()[0] : ' ';
+                        valueToLetter[value] = letter;
+                    }
+                }
+            }
+
+            using (StreamReader reader = new(inputFile1))
+            using (StreamWriter writer = new(outputFile))
+            {
+                string? line;
+                while ((line = await reader.ReadLineAsync()) != null)
+                {
+                    string[] parts = line.Split('\t');
+                    if (parts.Length >= 1)
+                    {
+                        string value = parts[0].Trim();
+                        if (valueToLetter.ContainsKey(value))
+                        {
+                            char letter = valueToLetter[value];
+                            await writer.WriteLineAsync($"{value}\t{letter}");
+                        }
+                        else
+                        {
+                            await writer.WriteLineAsync($"{value}\t");
+                        }
+                    }
+                }
+            }
+        }
+
+        private static async Task CleanFileAsync(string filePath)
+        {
+            await Task.Run(() =>
+            {
+                var lines = File.ReadLines(filePath).ToList();
+
+                var validRowPattern = new Regex(@"^\S+\s+[a-zA-Z]$");
+
+                var validLines = lines.Where(line => validRowPattern.IsMatch(line)).ToList();
+
+                File.WriteAllLines(filePath, validLines);
+            });
+        }
+
+        // BUTTON 5 SECTION
+
+        private async void Button5_Click(object sender, EventArgs e)
+        {
+            button4.Enabled = false;
+            LogMessage("Нажата кнопка добавления в базу данных");
+            ShowLoadingForm("Добавление данных в базу данных...");
+
+            if (string.IsNullOrEmpty(completedFilePath) || !File.Exists(completedFilePath))
+            {
+                MessageBox.Show(
+                    "Файл не найден или путь к файлу не указан.",
+                    "Ошибка",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+                HideLoadingForm();
+                return;
+            }
+
+            try
+            {
+                List<DatabaseTemplate> newEntries = new();
+
+                using (StreamReader reader = new(completedFilePath))
+                {
+                    string? line;
+                    int lineNumber = 0;
+
+                    while ((line = await reader.ReadLineAsync()) != null)
+                    {
+                        lineNumber++;
+                        string[] parts = line.Split('\t');
+                        if (parts.Length >= 1)
+                        {
+                            string code = parts[0].Trim();
+
+                            var newEntry = new DatabaseTemplate
+                            {
+                                MarkingCode = code,
+                                RowNumber = lineNumber,
+                                FileName = Path.GetFileName(completedFilePath)
+                            };
+
+                            newEntries.Add(newEntry);
+                        }
+                    }
+                }
+
+                using (DatabaseContextUnique unique_db = new())
+                {
+                    await unique_db.UniqueCodes.AddRangeAsync(newEntries);
+                    await unique_db.SaveChangesAsync();
+                }
+
+                HideLoadingForm();
+                LogMessage("Данные успешно добавлены в базу данных");
+                MessageBox.Show(
+                    "Данные успешно добавлены в базу данных.",
+                    "Успех",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information
+                );
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                Restart_App();
+            }
+            catch (IOException ex)
+            {
+                MessageBox.Show(
+                    $"Произошла ошибка ввода-вывода: {ex.Message}",
+                    "Ошибка",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+                HideLoadingForm();
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                MessageBox.Show(
+                    $"Отказано в доступе: {ex.Message}",
+                    "Ошибка",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+                HideLoadingForm();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Произошла ошибка: {ex.Message}",
+                    "Ошибка",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+                HideLoadingForm();
+            }
+        }
+
+        // BUTTON 6 SECTION
+
+        private void Button6_Click(object sender, EventArgs e)
+        {
+            DialogResult = MessageBox.Show(
+                $"Вы уверены, что хотите сбросить в начально состояние приложение?",
+                "Сброс",
+                MessageBoxButtons.OKCancel,
+                MessageBoxIcon.Information
+            );
+            if (DialogResult == DialogResult.OK)
+            {
+                Restart_App();
+            }
+        }
     }
 }
