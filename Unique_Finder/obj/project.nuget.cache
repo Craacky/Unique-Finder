@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "FpKsJfbPUtQ=",
+  "dgSpecHash": "Mb7rdFnSxM8=",
   "success": true,
-  "projectFilePath": "C:\\Projects\\Unique_Finder\\Unique_Finder\\Unique_Finder.csproj",
+  "projectFilePath": "C:\\Development\\Unique-Finder\\Unique_Finder\\Unique_Finder.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\cbxjy\\.nuget\\packages\\microsoft.csharp\\4.5.0\\microsoft.csharp.4.5.0.nupkg.sha512",
     "C:\\Users\\cbxjy\\.nuget\\packages\\microsoft.data.sqlclient\\2.0.1\\microsoft.data.sqlclient.2.0.1.nupkg.sha512",

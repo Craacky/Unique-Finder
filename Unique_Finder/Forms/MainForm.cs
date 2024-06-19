@@ -89,6 +89,7 @@ namespace Unique_Finder
 
         private bool CheckSqlServerInstalled()
         {
+            LogMessage("Проверка установленного Microsoft SQL Server");
             string instanceName = "MSSQLSERVER";
             var rk = Registry.LocalMachine.OpenSubKey(
                 @"SOFTWARE\Microsoft\Microsoft SQL Server\Instance Names\SQL"
@@ -117,6 +118,7 @@ namespace Unique_Finder
 
         public bool CheckDatabaseValidation()
         {
+            LogMessage("Проверка наличия корректной базы данных");
             string connectionString = "Server = localhost; Integrated Security = true";
             var connection = new SqlConnection(connectionString);
             connection.Open();
@@ -139,12 +141,14 @@ namespace Unique_Finder
                 || tableResult == null && databaseResult == null
             )
             {
+                LogMessage("Проверка базы данных пройдена");
                 textBox2.BackColor = Color.LightBlue;
                 textBox2.Text = "Корректна";
                 return true;
             }
             else
             {
+                LogMessage("Проверка базы данных не пройдена");
                 textBox2.BackColor = Color.Red;
                 textBox2.Text = "Не Корректна";
                 return false;
@@ -204,7 +208,7 @@ namespace Unique_Finder
 
         private void LogMessage(string message)
         {
-            using (StreamWriter writer = new StreamWriter(logFilePath, true))
+            using (StreamWriter writer = new(logFilePath, true))
             {
                 writer.WriteLine($"[{DateTime.Now:HH:mm:ss}] {message}");
             }
@@ -223,7 +227,12 @@ namespace Unique_Finder
 
             if (result == DialogResult.No)
             {
+                LogMessage("Выход из приложения отменён");
                 e.Cancel = true;
+            }
+            if (result == DialogResult.Yes)
+            {
+                LogMessage("Работа приложения закончена");
             }
         }
 
@@ -252,6 +261,7 @@ namespace Unique_Finder
 
         private void Button1_Click(object sender, EventArgs e)
         {
+            LogMessage("Открытие исходного файла");
             using OpenFileDialog openFileDialog =
                 new()
                 {
@@ -263,16 +273,23 @@ namespace Unique_Finder
 
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
+                LogMessage("Открытие исходного файла произведенно успешно");
                 sourceFilePath = openFileDialog.FileName;
                 textBox4.Text = sourceFilePath;
                 textBox4.BackColor = Color.LightGreen;
-                textBox3.Text = "Файл открыт, теперь, откройте файл камеры";
+                textBox3.Text = "Файл открыт, теперь, произведите проверку файла";
                 textBox3.BackColor = Color.LightGreen;
 
                 button2.Enabled = true;
                 button2.BeginInvoke(new MethodInvoker(() => button2.Select()));
             }
+            else
+            {
+                LogMessage("Открытие исходного файла отмененно");
+            }
         }
+
+        // BUTTON 2 SECTION
 
         private async void Button2_Click(object sender, EventArgs e)
         {
@@ -427,6 +444,11 @@ namespace Unique_Finder
             }
         }
 
+        // SECTION BUTTON 3
+
+
+
+
         private async void Button3_Click(object sender, EventArgs e)
         {
             button1.Enabled = false;
@@ -523,19 +545,20 @@ namespace Unique_Finder
                 Path.GetFileNameWithoutExtension(copiedSourceFilePath.Replace(" ", ""))
                 + Path.GetExtension(copiedSourceFilePath);
 
-            using (var writer = new StreamWriter(errorReportPath))
+            using var writer = new StreamWriter(errorReportPath);
+            foreach (var duplicate in duplicates)
             {
-                foreach (var duplicate in duplicates)
-                {
-                    var entity = existingEntities.First(e => e.MarkingCode == duplicate);
-                    await writer.WriteLineAsync(
-                        $"[Источник]:{checkedFile}      [дубликат]:{duplicate}      [оригинал]:{entity.FileName}        [строка]:{entity.RowNumber}"
-                    );
-                }
-                await writer.WriteLineAsync("\n\tЛимит проверки дубликатов = 20 кодов\t");
-                await writer.DisposeAsync();
+                var entity = existingEntities.First(e => e.MarkingCode == duplicate);
+                await writer.WriteLineAsync(
+                    $"[Источник]:{checkedFile}      [дубликат]:{duplicate}      [оригинал]:{entity.FileName}        [строка]:{entity.RowNumber}"
+                );
             }
+            await writer.WriteLineAsync("\n\tЛимит проверки дубликатов = 20 кодов\t");
+            await writer.DisposeAsync();
         }
+
+        // SECTION BUTTON 4
+
 
         private void Button4_Click(object sender, EventArgs e) { }
     }
