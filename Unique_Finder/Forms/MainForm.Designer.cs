@@ -71,21 +71,25 @@
             // 
             textBox2.BackColor = System.Drawing.SystemColors.ControlLightLight;
             textBox2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            textBox2.Font = new System.Drawing.Font("Yu Gothic UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             textBox2.Location = new System.Drawing.Point(290, 61);
             textBox2.Name = "textBox2";
             textBox2.ReadOnly = true;
             textBox2.Size = new System.Drawing.Size(329, 23);
             textBox2.TabIndex = 3;
+            textBox2.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // textBox1
             // 
             textBox1.BackColor = System.Drawing.SystemColors.ControlLightLight;
             textBox1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            textBox1.Font = new System.Drawing.Font("Yu Gothic UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             textBox1.Location = new System.Drawing.Point(290, 29);
             textBox1.Name = "textBox1";
             textBox1.ReadOnly = true;
             textBox1.Size = new System.Drawing.Size(329, 23);
             textBox1.TabIndex = 2;
+            textBox1.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // label2
             // 
@@ -120,11 +124,13 @@
             // 
             textBox3.BackColor = System.Drawing.SystemColors.ControlLightLight;
             textBox3.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            textBox3.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             textBox3.Location = new System.Drawing.Point(24, 22);
             textBox3.Name = "textBox3";
             textBox3.ReadOnly = true;
             textBox3.Size = new System.Drawing.Size(595, 23);
             textBox3.TabIndex = 0;
+            textBox3.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // groupBox3
             // 
@@ -146,6 +152,7 @@
             button2.TabIndex = 2;
             button2.Text = "Проверка";
             button2.UseVisualStyleBackColor = true;
+            button2.Click += Button2_Click;
             // 
             // button1
             // 
@@ -155,11 +162,12 @@
             button1.TabIndex = 1;
             button1.Text = "Открыть исходный файл";
             button1.UseVisualStyleBackColor = true;
+            button1.Click += Button1_Click;
             // 
             // textBox4
             // 
             textBox4.BackColor = System.Drawing.SystemColors.ControlLightLight;
-            textBox4.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            textBox4.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             textBox4.Location = new System.Drawing.Point(24, 22);
             textBox4.Name = "textBox4";
             textBox4.ReadOnly = true;
@@ -186,6 +194,7 @@
             button4.TabIndex = 2;
             button4.Text = "Открыть файл камеры";
             button4.UseVisualStyleBackColor = true;
+            button4.Click += Button4_Click;
             // 
             // button3
             // 
@@ -195,11 +204,12 @@
             button3.TabIndex = 1;
             button3.Text = "Проверка файла с БД";
             button3.UseVisualStyleBackColor = true;
+            button3.Click += Button3_Click;
             // 
             // textBox5
             // 
             textBox5.BackColor = System.Drawing.SystemColors.ControlLightLight;
-            textBox5.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            textBox5.Font = new System.Drawing.Font("Segoe UI Semibold", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             textBox5.Location = new System.Drawing.Point(26, 27);
             textBox5.Name = "textBox5";
             textBox5.ReadOnly = true;
@@ -241,6 +251,7 @@
             Name = "MainForm";
             StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             Text = "Unique Finder";
+            Load += MainForm_Load;
             groupBox1.ResumeLayout(false);
             groupBox1.PerformLayout();
             groupBox2.ResumeLayout(false);

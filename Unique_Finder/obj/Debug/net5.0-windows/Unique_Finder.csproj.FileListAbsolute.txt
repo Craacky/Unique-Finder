@@ -52,3 +52,4 @@ C:\Projects\Unique_Finder\Unique_Finder\obj\Debug\net5.0-windows\Unique_Finder.g
 C:\Projects\Unique_Finder\Unique_Finder\obj\Debug\net5.0-windows\ref\Unique_Finder.dll
 C:\Projects\Unique_Finder\Unique_Finder\obj\Debug\net5.0-windows\Unique_Finder.MainForm.resources
 C:\Projects\Unique_Finder\Unique_Finder\obj\Debug\net5.0-windows\Unique_Finder.csproj.GenerateResource.cache
+C:\Projects\Unique_Finder\Unique_Finder\obj\Debug\net5.0-windows\Unique_Finder.Forms.LoadingForm.resources

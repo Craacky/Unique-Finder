@@ -3,16 +3,16 @@ using Unique_Finder.Database.Entities;
 
 namespace Unique_Finder.Database
 {
-    public class ApplicationContextUnique : DbContext
+    public class DatabaseContextUnique : DbContext
     {
-        public DbSet<DatabaseTemplate> Codes { get; set; }
+        public DbSet<DatabaseTemplate> UniqueCodes { get; set; }
 
-        public ApplicationContextUnique() => Database.EnsureCreated();
+        public DatabaseContextUnique() => Database.EnsureCreated();
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlServer(
-                @"Server=localhost;Database=Unique_Codes_db;Trusted_Connection=True;"
+                @"Server=localhost;Database=unique_db;Trusted_Connection=True;"
             );
         }
     }
