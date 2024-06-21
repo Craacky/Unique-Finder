@@ -7,6 +7,10 @@
       "RelativeMoniker": "D:0:0:{C24C8DF2-4EEA-47DB-ACDD-0B2122E8917D}|Unique_Finder\\Unique_Finder.csproj|solutionrelative:unique_finder\\forms\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{C24C8DF2-4EEA-47DB-ACDD-0B2122E8917D}|Unique_Finder\\Unique_Finder.csproj|C:\\Projects\\Unique-Finder\\unique_finder\\forms\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{C24C8DF2-4EEA-47DB-ACDD-0B2122E8917D}|Unique_Finder\\Unique_Finder.csproj|solutionrelative:unique_finder\\forms\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{C24C8DF2-4EEA-47DB-ACDD-0B2122E8917D}|Unique_Finder\\Unique_Finder.csproj|c:\\projects\\unique-finder\\unique_finder\\forms\\loadingform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{C24C8DF2-4EEA-47DB-ACDD-0B2122E8917D}|Unique_Finder\\Unique_Finder.csproj|solutionrelative:unique_finder\\forms\\loadingform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -17,10 +21,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{C24C8DF2-4EEA-47DB-ACDD-0B2122E8917D}|Unique_Finder\\Unique_Finder.csproj|c:\\projects\\unique-finder\\unique_finder\\database\\entities\\databasetemplate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{C24C8DF2-4EEA-47DB-ACDD-0B2122E8917D}|Unique_Finder\\Unique_Finder.csproj|solutionrelative:unique_finder\\database\\entities\\databasetemplate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C24C8DF2-4EEA-47DB-ACDD-0B2122E8917D}|Unique_Finder\\Unique_Finder.csproj|C:\\Projects\\Unique-Finder\\unique_finder\\forms\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{C24C8DF2-4EEA-47DB-ACDD-0B2122E8917D}|Unique_Finder\\Unique_Finder.csproj|solutionrelative:unique_finder\\forms\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     },
     {
       "AbsoluteMoniker": "D:0:0:{C24C8DF2-4EEA-47DB-ACDD-0B2122E8917D}|Unique_Finder\\Unique_Finder.csproj|C:\\Projects\\Unique-Finder\\unique_finder\\forms\\loadingform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
@@ -38,7 +38,7 @@
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 1,
               "Title": "MainForm.cs [Design]",
               "DocumentMoniker": "C:\\Projects\\Unique-Finder\\Unique_Finder\\Forms\\MainForm.cs",
               "RelativeDocumentMoniker": "Unique_Finder\\Forms\\MainForm.cs",
@@ -57,7 +57,7 @@
               "RelativeDocumentMoniker": "Unique_Finder\\Forms\\MainForm.cs",
               "ToolTip": "C:\\Projects\\Unique-Finder\\Unique_Finder\\Forms\\MainForm.cs",
               "RelativeToolTip": "Unique_Finder\\Forms\\MainForm.cs",
-              "ViewState": "AQIAAMcCAAAAAAAAAAAWwOgCAAAmAAAA",
+              "ViewState": "AQIAAJ4DAAAAAAAAAAAqwK4DAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-06-17T22:49:56.591Z",
               "IsPinned": true,
@@ -65,7 +65,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "LoadingForm.cs",
               "DocumentMoniker": "C:\\Projects\\Unique-Finder\\Unique_Finder\\Forms\\LoadingForm.cs",
               "RelativeDocumentMoniker": "Unique_Finder\\Forms\\LoadingForm.cs",
@@ -78,7 +78,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "ApplicationContext.cs",
               "DocumentMoniker": "C:\\Projects\\Unique-Finder\\Unique_Finder\\Database\\ApplicationContext.cs",
               "RelativeDocumentMoniker": "Unique_Finder\\Database\\ApplicationContext.cs",
@@ -91,7 +91,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "DatabaseTemplate.cs",
               "DocumentMoniker": "C:\\Projects\\Unique-Finder\\Unique_Finder\\Database\\Entities\\DatabaseTemplate.cs",
               "RelativeDocumentMoniker": "Unique_Finder\\Database\\Entities\\DatabaseTemplate.cs",
@@ -108,10 +108,11 @@
               "Title": "LoadingForm.cs [Design]",
               "DocumentMoniker": "C:\\Projects\\Unique-Finder\\Unique_Finder\\Forms\\LoadingForm.cs",
               "RelativeDocumentMoniker": "Unique_Finder\\Forms\\LoadingForm.cs",
-              "ToolTip": "C:\\Projects\\Unique_Finder\\Unique_Finder\\Forms\\LoadingForm.cs [Design]",
-              "RelativeToolTip": "..\\Unique_Finder\\Unique_Finder\\Forms\\LoadingForm.cs [Design]",
+              "ToolTip": "C:\\Projects\\Unique-Finder\\Unique_Finder\\Forms\\LoadingForm.cs [Design]",
+              "RelativeToolTip": "Unique_Finder\\Forms\\LoadingForm.cs [Design]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-19T00:11:57.2Z"
+              "WhenOpened": "2024-06-19T00:11:57.2Z",
+              "EditorCaption": " [Design]"
             }
           ]
         }

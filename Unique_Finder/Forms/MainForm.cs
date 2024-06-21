@@ -86,6 +86,7 @@ namespace Unique_Finder
 
             GC.Collect();
             GC.WaitForPendingFinalizers();
+            GC.WaitForFullGCComplete();
         }
 
         private bool CheckSqlServerInstalled()
@@ -295,6 +296,8 @@ namespace Unique_Finder
         private async void Button2_Click(object sender, EventArgs e)
         {
             button1.Enabled = false;
+            button6.Enabled = false;
+
             const int MaxLinesPerChunk = 1000000;
             try
             {
@@ -380,6 +383,7 @@ namespace Unique_Finder
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Error
                     );
+                    button6.Enabled = true;
 
                     Restart_App();
                     textBox3.Text = "Найдены дубликаты";
@@ -409,7 +413,8 @@ namespace Unique_Finder
 
                     textBox3.Text = "Дубликатов не найдено";
                     textBox3.BackColor = Color.LightGreen;
-                    button1.Enabled = true;
+                    button6.Enabled = true;
+                    button2.Enabled = false;
 
                     groupBox4.Enabled = true;
                     button3.Enabled = true;
@@ -456,6 +461,8 @@ namespace Unique_Finder
 
             button1.Enabled = false;
             button2.Enabled = false;
+            button6.Enabled = false;
+
             LogMessage("Нажата кнопка сравнения.");
             List<string> duplicates = new();
 
@@ -486,9 +493,8 @@ namespace Unique_Finder
 
                     var existingMarkingCodes = existingEntities
                         .Select(e => e.MarkingCode)
+                        .Where(code => code != null)
                         .ToHashSet();
-
-                    duplicates = new List<string>();
 
                     using (StreamReader reader = new(sourceFilePath))
                     {
@@ -499,7 +505,10 @@ namespace Unique_Finder
                             if (parts.Length >= 1)
                             {
                                 string code = parts[0].Trim();
-                                if (existingMarkingCodes.Contains(code))
+                                if (
+                                    !string.IsNullOrEmpty(code)
+                                    && existingMarkingCodes.Contains(code)
+                                )
                                 {
                                     duplicates.Add(code);
                                     if (duplicates.Count >= 20)
@@ -523,6 +532,8 @@ namespace Unique_Finder
                         MessageBoxIcon.Information
                     );
                     LogMessage("Совпадения с базой данных отсутствуют.");
+                    button6.Enabled = true;
+                    button3.Enabled = false;
 
                     button4.Enabled = true;
                     button4.BeginInvoke(new MethodInvoker(() => button4.Select()));
@@ -531,10 +542,12 @@ namespace Unique_Finder
                 {
                     using (DatabaseContextUnique unique_db = new())
                     {
-                        var existingEntities = await unique_db
-                            .UniqueCodes.Where(e => duplicates.Contains(e.MarkingCode))
+                        var existingEntitiesWithDuplicates = await unique_db
+                            .UniqueCodes.Where(e =>
+                                duplicates.Contains(e.MarkingCode ?? string.Empty)
+                            )
                             .ToListAsync();
-                        await CreateErrorReportAsync(duplicates, existingEntities);
+                        await CreateErrorReportAsync(duplicates, existingEntitiesWithDuplicates);
                     }
                     MessageBox.Show(
                         $"Отчёт об ошибках создан:\n{errorReportPath}",
@@ -545,6 +558,7 @@ namespace Unique_Finder
                     LogMessage(
                         $"Совпадения с базой данных найдены. Отчет создан: {errorReportPath}"
                     );
+                    button6.Enabled = true;
                     Restart_App();
                 }
             }
@@ -556,6 +570,9 @@ namespace Unique_Finder
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error
                 );
+                button6.Enabled = true;
+                LogMessage($"Ошибка при проверке базы данных с файлом: {ex.Message}");
+
                 HideLoadingForm();
             }
             catch (UnauthorizedAccessException ex)
@@ -566,6 +583,9 @@ namespace Unique_Finder
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error
                 );
+                button6.Enabled = true;
+                LogMessage($"Ошибка при проверке базы данных с файлом: {ex.Message}");
+
                 HideLoadingForm();
             }
             catch (Exception ex)
@@ -576,6 +596,9 @@ namespace Unique_Finder
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error
                 );
+                button6.Enabled = true;
+                LogMessage($"Ошибка при проверке базы данных с файлом: {ex.Message}");
+
                 HideLoadingForm();
             }
 
@@ -729,7 +752,7 @@ namespace Unique_Finder
 
             using (var streamReader = new StreamReader(filePath))
             {
-                string line;
+                string? line;
                 while ((line = await streamReader.ReadLineAsync()) != null)
                 {
                     lines.Add(line);
@@ -746,39 +769,59 @@ namespace Unique_Finder
             string outputFile = file3;
             var valueToLetter = new Dictionary<string, char>();
 
-            using (StreamReader reader = new(inputFile2))
+            // Чтение данных для valueToLetter с буферизацией
+            using (StreamReader reader = new StreamReader(inputFile2))
             {
-                string? line;
-                while ((line = await reader.ReadLineAsync()) != null)
+                char[] buffer = new char[81920]; // Буфер размером 80 Кб
+                int bytesRead;
+                while ((bytesRead = await reader.ReadAsync(buffer, 0, buffer.Length)) > 0)
                 {
-                    string[] parts = line.Split('\t');
-                    if (parts.Length >= 2)
+                    string data = new string(buffer, 0, bytesRead);
+                    string[] lines = data.Split(
+                        new[] { '\r', '\n' },
+                        StringSplitOptions.RemoveEmptyEntries
+                    );
+                    foreach (string line in lines)
                     {
-                        string value = parts[0].Trim();
-                        char letter = parts[1].Trim().Length > 0 ? parts[1].Trim()[0] : ' ';
-                        valueToLetter[value] = letter;
+                        string[] parts = line.Split('\t');
+                        if (parts.Length >= 2)
+                        {
+                            string value = parts[0].Trim();
+                            char letter = parts[1].Trim().Length > 0 ? parts[1].Trim()[0] : ' ';
+                            valueToLetter[value] = letter;
+                        }
                     }
                 }
             }
 
-            using (StreamReader reader = new(inputFile1))
-            using (StreamWriter writer = new(outputFile))
+            // Запись данных в outputFile с буферизацией
+            using (StreamReader reader = new StreamReader(inputFile1))
+            using (StreamWriter writer = new StreamWriter(outputFile))
             {
-                string? line;
-                while ((line = await reader.ReadLineAsync()) != null)
+                char[] buffer = new char[81920]; // Буфер размером 80 Кб
+                int bytesRead;
+                while ((bytesRead = await reader.ReadAsync(buffer, 0, buffer.Length)) > 0)
                 {
-                    string[] parts = line.Split('\t');
-                    if (parts.Length >= 1)
+                    string data = new string(buffer, 0, bytesRead);
+                    string[] lines = data.Split(
+                        new[] { '\r', '\n' },
+                        StringSplitOptions.RemoveEmptyEntries
+                    );
+                    foreach (string line in lines)
                     {
-                        string value = parts[0].Trim();
-                        if (valueToLetter.ContainsKey(value))
+                        string[] parts = line.Split('\t');
+                        if (parts.Length >= 1)
                         {
-                            char letter = valueToLetter[value];
-                            await writer.WriteLineAsync($"{value}\t{letter}");
-                        }
-                        else
-                        {
-                            await writer.WriteLineAsync($"{value}\t");
+                            string value = parts[0].Trim();
+                            if (valueToLetter.ContainsKey(value))
+                            {
+                                char letter = valueToLetter[value];
+                                await writer.WriteLineAsync($"{value}\t{letter}");
+                            }
+                            else
+                            {
+                                await writer.WriteLineAsync($"{value}\t");
+                            }
                         }
                     }
                 }
@@ -902,6 +945,7 @@ namespace Unique_Finder
 
         private void Button6_Click(object sender, EventArgs e)
         {
+            LogMessage("Кнопка перезагрузки нажата.");
             DialogResult = MessageBox.Show(
                 $"Вы уверены, что хотите сбросить в начально состояние приложение?",
                 "Сброс",
